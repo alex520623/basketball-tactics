@@ -1,6 +1,7 @@
 # Direct dependencies pinned for this initial environment.
 # Transitive dependencies may resolve differently across platforms/dates.
 -e .
+# Runtime streaming parser is pinned in pyproject.toml.
 numpy==2.3.4
 pandas==2.3.3
 pytest==8.4.2

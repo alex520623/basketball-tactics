@@ -2,9 +2,9 @@
 
 MM 課程專案，透過籃球追蹤資料分析球員移動與戰術，並以視覺化呈現分析結果。
 
-目前已完成 Python 開發環境與專案結構，功能開發尚未開始。SportVU 公開來源的
-[候選資料評估](docs/sportvu-assessment.md) 已完成單場抽查，是否正式採用仍待確認。
-資料管理方式見 [資料說明](data/README.md)。
+目前已完成 S1 Backend 的單場 SportVU 解析與 JSON 匯出，Frontend 尚未實作。
+資料來源為 NBA SportVU 2015–16，現階段僅作本機小規模技術驗證，授權仍待確認。
+執行方式與交接資訊見 [S1 Backend](docs/backend-s1.md)，資料管理見 [資料說明](data/README.md)。
 
 開發依據與前後端規劃見 [開發文件](docs/README.md)，包含簡報比較、系統架構、
 資料交換規格與 S1 實作計畫。
@@ -13,7 +13,7 @@ MM 課程專案，透過籃球追蹤資料分析球員移動與戰術，並以�
 
 | 階段 | 內容 | 狀態 |
 | --- | --- | --- |
-| S1 | 追蹤資料整理、2D 球場與球員軌跡視覺化 | 待資料集確認 |
+| S1 | 追蹤資料整理、2D 球場與球員軌跡視覺化 | Backend 已可匯出真實事件；Frontend 待開發 |
 | S2 | 球員時空關係、移動模式與基礎戰術分析 | 尚未開發 |
 | S3 | 串接 LLM，產生有資料依據的戰術解釋 | 尚未開發 |
 
@@ -41,8 +41,8 @@ basketball-tactics/
 
 ## 環境安裝
 
-需要 Git 與 Python **3.12.x**。主要套件為 NumPy、pandas 與 pytest，版本由
-`requirements.txt` 指定；建置設定見 `pyproject.toml`。間接依賴尚未完整鎖定。
+需要 Git 與 Python **3.12.x**。套件包含 NumPy、pandas、pytest 與串流解析器 ijson，
+版本由 `requirements.txt` 與 `pyproject.toml` 指定。間接依賴尚未完整鎖定。
 
 此 repository 為 Private，組員須先接受協作邀請。首次 clone 時，依 Git 的提示登入
 有存取權限的 GitHub 帳號。若使用 GitHub CLI，可先執行：
@@ -86,7 +86,8 @@ python3.12 -m venv .venv
 ```
 
 每台電腦各自建立 `.venv`。目前 Windows 環境已驗證，macOS 尚待實機驗證。
-現有 4 個測試檢查 Python 版本、虛擬環境、套件匯入與 NumPy/pandas 相容性。
+現有 4 個環境測試與 24 個 Backend 案例；Backend 測試需本機真實 sample，未取得時會明確
+skip。設定 SPORTVU_SAMPLE、匯出指令及驗證結果見 [Backend 文件](docs/backend-s1.md)。
 
 ### VS Code
 

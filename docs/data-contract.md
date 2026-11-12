@@ -1,7 +1,7 @@
 # Backend JSON 資料交換規格
 
-狀態：**0.2.0 草案**。依使用者指定候選 SportVU 來源的單場實測修訂；資料來源是否正式採用、
-Frontend 技術與整合方式仍待確認。目前沒有實作 importer、exporter、API 或 Frontend。
+狀態：**0.2.0 本機 S1 Backend 已實作**。2026-11-13 使用者決定採用 SportVU 作本機小規模
+技術驗證，授權仍待確認；Frontend 技術與整合方式未定。本版已實作解析與匯出，沒有 API 或 Frontend。
 0.1.0 的純示意公尺／左下角設定由本版取代。
 
 原始欄位與確認程度見 [SportVU 欄位查核](sportvu-fields.md)，下載與品質結果見
@@ -50,7 +50,7 @@ Frontend 技術與整合方式仍待確認。目前沒有實作 importer、expor
 | `source_moment_index` | integer | 原始事件的 moment 零起算位置 |
 | `source_timestamp_ms` | integer | moment[1] 原值，不代表已校正至影片或 play-by-play |
 | `period` | integer | moment[0]；不預先排除延長賽 |
-| `game_clock_s` | number | moment[2]，本節剩餘秒數，可停表與修正 |
+| `game_clock_s` | number 或 null | moment[2]，本節剩餘秒數；缺失／無效時為 null 並警告，不能取代 timestamp |
 | `shot_clock_s` | number 或 null | moment[3] 原值 |
 | `source_aux` | 原始 JSON 值；sample 為 null | moment[4]，語意未知，不指定為 confidence／possession |
 | `players[]` | array，可空 | 該影格有效球員點，不用固定順序或固定筆數假設 |
@@ -270,6 +270,27 @@ players metadata 要收集整個 clip 出現的球員，不能只取第一影格
 - 場外、缺漏、事件重疊與未知欄位均有紀錄，不把合理場外座標直接刪掉或夾回場內。
 - 不輸出假定的持球者、攻守方、戰術類別、信心值、傳球或改善建議。
 - 本版不決定 Frontend 框架、HTTP API、部署方式或整套系統選型。
+
+## 實作補充：連續 clip 與品質資訊
+
+完整執行方式與本次 525 影格輸出見 [S1 Backend](backend-s1.md)。上方兩影格範例保留作
+欄位映射說明，不代表目前完整輸出；正式匯出 gap_threshold_ms 一定是指定的正整數。
+
+- 時間間隔大於指定門檻、timestamp 回退或跨節會分成多個 clip；每個保留同一來源
+  eventId 與原始 moment 範圍，不把不連續時間重新排序或偽裝成一個回合。
+- 同 timestamp 且完整 moment 相同者去重；若資料衝突，直接失敗，避免默選一筆。
+- 壞 timestamp／moment 移除並記錄；其後有效點中斷軌跡。缺球、無效位置、重複 entity ID
+  亦不補點，重新出現時建立新段。缺失的倒數時鐘輸出 null，不製造時間值。
+- 有限且合理的場外座標保持原值；超過 coordinate_limit_ft（預設 1000）的極端 x／y 點
+  移除並警告。此為工程保護參數，不是球場邊界或供應商規格；不聲稱能偵測所有追蹤誤差。
+- quality 新增 policy 與 summary，記錄門檻、缺漏處理及來源事件的輸入／丟棄／去重／分段統計。
+  warnings 的 scope 為 source_event，跨 clip 共用來源事件警告；每筆保留 source_moment_index，
+  frame_index 只在該來源點位於當前 clip 時有值，否則為 null。
+- source_file_sha256 以串流計算；沒有確認過 source_commit 時用 null。manifest 標記
+  adoption_status=local_s1_validation、license_status=unconfirmed、usage_scope=local_small_scale。
+
+以上為補足未定品質政策與可觀測性的欄位，保留 0.2.0 的核心物件結構；Frontend 應能忽略
+額外品質 metadata，但必須處理 null 與多 clip。後續不相容改動再更新 schema version。
 
 S2／S3 的速度、距離、模式與解釋另定衍生結果格式，需標示計算方法與證據來源。
 其他比賽仍須驗證，不能只憑單場 sample 宣稱全庫相容。
