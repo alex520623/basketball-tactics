@@ -2,6 +2,9 @@
 
 MM 課程兩人專案。目前只有開發環境與版本管理骨架，尚未實作產品功能。
 
+GitHub：[alex520623/basketball-tactics](https://github.com/alex520623/basketball-tactics)
+（Private；需有 repository 存取權限）。
+
 ## 範圍與分工
 
 | 階段 | 預定內容 | 目前狀態 |
@@ -49,10 +52,10 @@ Git 與 GitHub CLI 分別見 [Git](https://git-scm.com/downloads) 與
 
 ## Windows 11：clone 後重建（PowerShell）
 
-將下方 `OWNER` 換成實際 GitHub repository 擁有者；遠端尚未建立時不能 clone。
+使用有權限的 GitHub 帳號完成登入後，執行：
 
 ```powershell
-git clone https://github.com/OWNER/basketball-tactics.git
+git clone https://github.com/alex520623/basketball-tactics.git
 cd basketball-tactics
 py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
@@ -82,7 +85,7 @@ $projectPython = Get-ChildItem .tools/python -Filter python.exe -Recurse | Selec
 先安裝適合該 Mac 架構的 Python 3.12；不要依賴系統內建的 Python。
 
 ```bash
-git clone https://github.com/OWNER/basketball-tactics.git
+git clone https://github.com/alex520623/basketball-tactics.git
 cd basketball-tactics
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
@@ -187,7 +190,7 @@ git status --short --branch
 ```
 
 若已建立空的遠端 repository，使用實際 URL 執行
-`git remote add origin https://github.com/OWNER/basketball-tactics.git`，不要重複建立。
+`git remote add origin https://github.com/alex520623/basketball-tactics.git`，不要重複建立。
 若遠端不是空的，先 fetch 並檢查歷史；不要 force push 或盲目合併。
 初始化完成後，repo 擁有者到 GitHub Settings → Collaborators 邀請另一位組員。
 若帳號方案可用，為 `main` 設定 PR 與審核規則；否則以兩人約定遵守以下流程。
