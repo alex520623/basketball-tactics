@@ -1,17 +1,19 @@
 # 系統架構與分工
 
-狀態：實作提案，尚未建立下列功能模組。需求依據見 [簡報整理](requirements.md)，
-資料介面草案見 [data-contract.md](data-contract.md)。
+狀態：供討論的責任邊界，尚未建立下列功能模組。Backend 由主要開發者負責資料處理與
+戰術分析，Frontend 由另一位組員負責。Frontend 尚無現成程式；HTML／JavaScript／Canvas
+僅為 S1 暫定選項，框架、傳輸及部署方式由組員確認後再整合。
+需求依據見 [簡報整理](requirements.md)，來源對照的資料草案見 [data-contract.md](data-contract.md)。
 
 ## S1 的開發方式
 
-建議採用單一 repository：Python Backend 讀取原先選定資料集，整理並匯出 JSON；
-Frontend 載入同一份 JSON，負責球場呈現與時間互動。S1 先以本機靜態展示串接，
-後續有動態查詢或上傳需求時再加入 API server。
+目前優先對齊 Python Backend 輸出的 JSON，讓 Frontend 不必直接理解 SportVU tuple。
+SportVU 來源尚待正式採用，見 [資料評估](sportvu-assessment.md)。資料可用檔案、HTTP 或
+API 傳遞，但本階段不決定整套技術架構，也不開始實作 Frontend。
 
 ```mermaid
 flowchart LR
-    A[原先選定的追蹤資料] --> B[Backend：讀取與欄位對照]
+    A[待確認採用的追蹤資料] --> B[Backend：讀取與欄位對照]
     B --> C[時間與座標標準化]
     C --> D[資料驗證與品質報告]
     D --> E[版本化 JSON]
@@ -23,23 +25,22 @@ flowchart LR
     I -.-> F
 ```
 
-採檔案介面的原因是讓兩人可先用固定格式各自開發，展示不必依賴資料庫、模型服務或外部 API。
-檔案規格與傳輸方式分開：若組員已有 React、Vue 或 API 架構，可保留相同 JSON 定義，
-另行確認載入方式。這項建議不代表前端技術已經定案。
+JSON 欄位定義與傳輸方式分開，Frontend 可自行選擇符合此資料介面的技術。
+S1 不依賴戰術模型或 LLM API；前後端確認資料規格後才安排整合。
 
 ## 技術與目錄規劃
 
 | 範圍 | 建議 | 現況 |
 | --- | --- | --- |
 | Backend | Python 3.12、pandas、NumPy；使用 pathlib 處理路徑 | 已安裝，尚無功能 |
-| Frontend | HTML、CSS、JavaScript 模組與 Canvas 2D | 待組員確認，尚未建立 |
-| 資料交換 | UTF-8 JSON，顯式版本、單位、時間與來源資訊 | 草案 0.1.0 |
-| 本機展示 | Python 標準庫的靜態 HTTP server | 規劃中 |
+| Frontend | HTML、JavaScript、Canvas 暫定，組員可另選框架 | 尚無現成程式，本階段不實作 |
+| 資料交換 | UTF-8 JSON，含版本、單位、時間、隊伍、球與軌跡 | SportVU 對照草案 0.2.0 |
+| 傳輸與展示 | 檔案、HTTP 或 API | 待 Frontend 組員確認 |
 | 分析／LLM | S2／S3 才追加必要工具 | 尚未選型或安裝 |
 
-Canvas 可繪製 2D 圖形，適合這個初期球場與軌跡畫面，參考
+Canvas 是可選的 2D 繪圖方式，參考
 [Canvas API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)。
-下列目錄按工作包逐步增加，不先建立空模組：
+下列僅為 Backend 工作包的目錄建議，按需增加；Frontend 目錄與工具待組員決定：
 
 ```text
 src/basketball_tactics/
@@ -48,18 +49,14 @@ src/basketball_tactics/
 ├── cli.py               # 本機匯出與展示資料準備入口
 ├── analysis/            # S2 才建立
 └── explanation/         # S3 才建立
-frontend/
-├── index.html
-├── styles.css
-└── src/                 # 資料載入、球場繪圖、播放控制
 tests/
 ├── fixtures/            # 授權允許的小型樣本或明確標示的合成案例
 └── ...                  # 各工作包的測試
-outputs/demo/            # 匯出的展示資料與網頁資源；不進 Git
+outputs/                 # 匯出資料與分析結果；不進 Git
 ```
 
-僅支援原先選定資料集的第一個 importer，不先設計多資料集插件系統。
-資料集確定後再決定欄位映射與原始資料讀取格式。
+正式採用資料來源後先做一個 importer，不先設計多資料集插件系統。
+SportVU 已實測欄位見 [原始欄位查核](sportvu-fields.md)，其他比賽仍須確認品質。
 
 ## Backend／Frontend 責任
 
@@ -67,7 +64,7 @@ outputs/demo/            # 匯出的展示資料與網頁資源；不進 Git
 | --- | --- | --- | --- |
 | 資料接入 | 來源盤點、讀取、原始 ID 保留、片段切分 | 顯示片段名稱與資料狀態 | 資料版本與示範片段 |
 | 時間 | 轉成片段相對時間、排序、辨識重置與間隙 | 依實際時間播放、暫停與拖曳 | 播放與缺漏行為 |
-| 座標 | 確認單位、尺寸、原點、方向，轉成標準座標 | 保持比例映射至畫布，處理 y 軸反向 | 球場線條、全／半場與方向 |
+| 座標 | 保留來源 feet，記錄單位與球場依據，不預先鏡射 | 保持比例繪製，依已核對方向轉畫面 | 原點、y 軸、場地線條與方向 |
 | 身分 | 建立球員、隊伍與來源 ID 對照 | 穩定顏色、球員標籤、缺席或未知狀態 | ID 不完整時的展示方式 |
 | 缺漏 | 標記缺失與軌跡中斷，輸出品質報告 | 不跨缺漏連線，顯示警告 | 可接受的展示片段 |
 | 介面 | 匯出並驗證 JSON | 讀取與檢查版本，處理空值及錯誤 | schema 變更與範例 |
@@ -78,34 +75,17 @@ outputs/demo/            # 匯出的展示資料與網頁資源；不進 Git
 Frontend 不依賴原始資料集欄位，也不自行重做單位或攻守方向推論。Backend 不將
 螢幕像素當成分析座標。未提供隊伍、球位置或持球者時，兩端均保留未知狀態。
 
-## S1 的資料與展示流程
+## S1 的資料交接
 
-1. 原始資料由組員各自依授權取得，存入 `data/raw/`，保持原樣。
-2. Backend 依欄位對照產生標準化資料，保存轉換參數與品質摘要到 `data/processed/`。
-3. 選取短片段，匯出 `outputs/demo/data/manifest.json` 與 `data/clips/*.json`。
-4. 展示準備步驟將 `frontend/` 必要資源複製到 `outputs/demo/`，形成可單獨服務的目錄。
-5. 靜態 server 僅服務 `outputs/demo/`。Frontend 由同一來源取得 JSON，不直接讀取 raw 檔案。
+1. 決定是否正式採用候選來源，確認課程使用與資料授權範圍，再記錄正式原檔位置。
+2. Backend 保存來源、ID、時間基準及品質紀錄，選取一段可核對的短視窗。
+3. 依 0.2.0 草案提供 clip 清單、球員／隊伍 metadata、逐影格位置、球與軌跡索引。
+4. Frontend 組員確認技術與載入方式後，雙方再定檔案路徑或 API 介面。
+5. 核對 ID、位置、時間、缺漏與軌跡連續性，完成展示驗收。
 
-步驟 2–4 的命令列入口尚未實作，屆時才加入可執行的匯出指令。產生展示目錄後，預定以：
-
-```powershell
-# Windows：須先完成資料匯出與網頁資源準備
-.\.venv\Scripts\python.exe -m http.server 8000 --bind 127.0.0.1 --directory outputs/demo
-```
-
-```bash
-# macOS：須先完成資料匯出與網頁資源準備
-.venv/bin/python -m http.server 8000 --bind 127.0.0.1 --directory outputs/demo
-```
-
-再開啟 `http://127.0.0.1:8000/`。這是本機展示方式，尚未提供可開啟的系統。
-參考 [Python http.server](https://docs.python.org/3.12/library/http.server.html) 的目錄與 bind 選項；
-正式網路部署另行規劃。
-
-Frontend 以時間軸尋找對應資料影格，不以螢幕更新次數當成資料採樣頻率。
-可使用 [requestAnimationFrame](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame)
-更新畫面；切回背景分頁後避免突然跳過整段，初期建議切離分頁即暫停。
-S1 預設呈現實際樣本位置，不插值；缺失或時間間隙切斷軌跡。
+以上尚無可執行入口，server、打包與部署方式不在本階段定案。
+播放依 source timestamp 差建立的時間軸，不以畫面更新率或倒數 game clock 取代資料時間。
+座標保留原值，不插值，也不跨缺漏連線；顯示端的方向映射待單場畫面核對後另訂。
 
 ## S2／S3 的擴充邊界
 

@@ -1,0 +1,76 @@
+{
+  "review_date": "2026-11-12",
+  "adoption_status": "pending",
+  "repository": "https://github.com/linouk23/NBA-Player-Movements",
+  "source_commit": "f7d4cf2c7e607029abfd5715a0d4073bedae328e",
+  "archive_inventory": {
+    "archive_count": 636,
+    "date_parse_count": 636,
+    "filename_date_min": "2015-10-27",
+    "filename_date_max": "2016-01-23",
+    "total_archive_bytes": 3793503906
+  },
+  "sample": {
+    "repository_commit": "f7d4cf2c7e607029abfd5715a0d4073bedae328e",
+    "source_path": "data/2016.NBA.Raw.SportVU.Game.Logs/12.30.2015.LAL.at.BOS.7z",
+    "compressed_bytes": 6149333,
+    "sha256": "8e622df1fe6909773617a5691a94925bf5624375e106da5801c28fd252890e78",
+    "git_blob_sha": "55ae8dc8f975cf0c8d82f35b6840b8b6f5270e94",
+    "source_url": "https://raw.githubusercontent.com/linouk23/NBA-Player-Movements/f7d4cf2c7e607029abfd5715a0d4073bedae328e/data/2016.NBA.Raw.SportVU.Game.Logs/12.30.2015.LAL.at.BOS.7z",
+    "json_sha256": "5ad649c3b741cc45c01c586cbf073d56d67da0f2315fe7acedb477bc43116036",
+    "uncompressed_bytes": 102875951,
+    "game_id": "0021500476",
+    "game_date": "2015-12-30"
+  },
+  "observations": {
+    "event_count": 489,
+    "nonempty_events": 484,
+    "empty_events": 5,
+    "moment_count_including_overlaps": 209431,
+    "entity_count_distribution": {
+      "11": 208079,
+      "10": 1314,
+      "1": 38
+    },
+    "shot_clock_null_moments": 19855,
+    "unique_period_field1_gameclock_keys": 82276,
+    "events_with_non_increasing_field1": 2,
+    "all_entity_xy_range": {
+      "x": [
+        -5.86593,
+        99.43339
+      ],
+      "y": [
+        -3.09809,
+        53.65071
+      ]
+    },
+    "field4_values": {
+      "None": 209431
+    }
+  },
+  "quality_observations": {
+    "missing_ball_moments": 1311,
+    "player_count_distribution": {
+      "10": 209390,
+      "9": 3,
+      "0": 38
+    },
+    "global_unique_clock_duplication_factor": 2.545468909524041,
+    "recommended_candidate": {
+      "event_index": 1,
+      "event_id": "2",
+      "period": 1,
+      "moments": 525,
+      "duration_timestamp_ms": 20959,
+      "game_clock_start_s": 719.47,
+      "game_clock_end_s": 698.2
+    }
+  },
+  "limitations": [
+    "One game inspected; no full-dataset quality guarantee.",
+    "No product importer, exporter, analysis or frontend implemented.",
+    "No LICENSE found in the inspected tree; not an authorization to redistribute raw data.",
+    "Timestamp, units and ball z semantics are corroborated interpretations, not an embedded vendor schema."
+  ]
+}
