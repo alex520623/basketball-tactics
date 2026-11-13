@@ -3,7 +3,9 @@
 調查日期：2026-11-12。候選來源為使用者指定的
 [linouk23/NBA-Player-Movements](https://github.com/linouk23/NBA-Player-Movements)，
 調查版本固定為 `f7d4cf2c7e607029abfd5715a0d4073bedae328e`。
-目前狀態為**待決定是否採用**，不是已核定的專案資料集。
+原調查時為待決定採用的候選。**2026-11-13 更新**：使用者已核定 S1 本機小規模
+技術驗證，授權仍待確認，不公開散布 raw。下列保留原調查結果，Backend 實作見
+[執行文件](backend-s1.md)。
 
 此次調查的來源版本、檔案 hash 與統計收據見 [sportvu-audit.json](sportvu-audit.json)。
 
