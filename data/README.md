@@ -1,14 +1,17 @@
 # 資料管理
 
-原本已選定的籃球追蹤資料集仍待確認。本次未下載、替換或加入任何資料集。
+目前正在評估使用者指定的 [NBA-Player-Movements](https://github.com/linouk23/NBA-Player-Movements)
+SportVU 2015–16 追蹤資料，尚未正式採用。可下載性、單場 sample、格式與限制見
+[評估報告](../docs/sportvu-assessment.md)，原始欄位與輸出草案見
+[欄位查核](../docs/sportvu-fields.md) 與 [Backend JSON 規格](../docs/data-contract.md)。
 
-- `raw/`：原始資料，取得後保持原樣，不提交 Git。
-- `processed/`：由原始資料衍生的中間資料，不提交 Git。
-- 根目錄的 `outputs/`：圖表、影片和分析輸出，不提交 Git。
+已抽查的一場原檔暫存在本機 `.tools/sportvu-review/`，未作為正式開發資料匯入。
+原 repository 未見明確授權，正式採用前需確認課程使用及資料散布範圍。
 
-確認資料集後，請在此補上：資料集名稱、官方來源、版本／取得日期、授權、
-下載與解壓步驟、檔案雜湊、欄位說明，以及球場座標單位和時間定義。
-組員各自依相同步驟取得資料；私人 repository 也不代表可以再散布資料。
+- `raw/`：正式取得的原始資料，保持原樣，不提交 Git。
+- `processed/`：清理結果、欄位映射、來源 hash 與品質報告，不提交 Git。
+- 根目錄 `outputs/`：匯出資料、圖表、影片與分析結果，不提交 Git。
 
-程式路徑使用 `pathlib.Path`，不要寫死個人電腦的磁碟機或使用者目錄。
-少量測試資料若日後確有需要，先確認授權，再放入 `tests/fixtures/`。
+正式採用後補上資料版本、來源 commit、授權依據、單場下載與解壓方式、檔案 hash、
+可重現的 sample 範圍及必要參數。組員各自依授權取得資料，程式路徑使用 pathlib，
+不寫死磁碟機或個人目錄。測試樣本需先確認可提交範圍；大型 raw 與輸出不進 repository。
