@@ -1,18 +1,39 @@
-# 資料管理
+# 資料準備
 
-2026-11-13 已選用 [NBA-Player-Movements](https://github.com/linouk23/NBA-Player-Movements)
-SportVU 2015–16 追蹤資料作 S1 本機小規模技術驗證；授權仍待確認，不公開散布原始資料。
-可下載性、單場 sample、格式與限制見
-[評估報告](../docs/sportvu-assessment.md)，原始欄位與輸出草案見
-[欄位查核](../docs/sportvu-fields.md) 與 [Backend JSON 規格](../docs/data-contract.md)。
+S1 使用 NBA SportVU 2015–16 籃球追蹤資料。第一次執行時，需要先準備一場比賽的原始檔，
+再用 Backend 轉成 Frontend 能讀取的 JSON。
 
-本機既有 `.tools/sportvu-review/0021500476.json` 已用於 Backend 驗證，不需搬移或重複下載。
-執行與測試方式見 [S1 Backend](../docs/backend-s1.md)。擴大使用及資料散布範圍仍待確認。
+## 要準備哪份資料？
 
-- `raw/`：正式取得的原始資料，保持原樣，不提交 Git。
-- `processed/`：清理結果、欄位映射、來源 hash 與品質報告，不提交 Git。
-- 根目錄 `outputs/`：匯出資料、圖表、影片與分析結果，不提交 Git。
+目前使用 **2015-12-30 湖人對塞爾提克**，比賽編號為 `0021500476`。
+原始檔來自 [NBA-Player-Movements](https://github.com/linouk23/NBA-Player-Movements)，
+單場下載連結與檔案核對資訊見 [測試比賽說明](../docs/sportvu-assessment.md#已驗證的單場-sample)。
+只需下載這一場，解壓後的檔名是 `0021500476.json`。
 
-資料版本、來源 commit、單場 hash、sample 範圍與執行參數已記錄於上述文件；
-授權依據仍待補充。組員各自依授權取得資料，程式路徑使用 pathlib，
-不寫死磁碟機或個人目錄。測試樣本需先確認可提交範圍；大型 raw 與輸出不進 repository。
+## 取得檔案後怎麼執行？
+
+1. 將 `0021500476.json` 放進專案的 `data/raw/`。
+2. 按照 [Backend 匯出步驟](../docs/backend-s1.md#匯出)，匯出事件編號 `2` 的片段。
+3. 完成後會產生 `outputs/s1-event-2/`，裡面有片段清單與球員位置資料，可供 Frontend 讀取。
+
+已有原始檔時可直接使用，不必重複下載；檔案放在其他位置時，將匯出命令的 `--input`
+改成該檔案的路徑。兩人使用同一份原始檔與匯出參數，就能產生相同的片段資料。
+
+## 這幾個資料夾各放什麼？
+
+| 路徑（相對於專案根目錄） | 用途 | 檔案怎麼來 |
+| --- | --- | --- |
+| `data/raw/` | 存放比賽原始檔，例如 `0021500476.json` | 下載並解壓後放入 |
+| `outputs/s1-event-2/` | 存放片段清單與位置 JSON | 執行 Backend 匯出命令後自動產生 |
+| `data/processed/` | 預留給後續資料處理使用，目前尚未使用 | 目前不需要放任何檔案 |
+
+這些資料檔不會上傳到 GitHub。組員 clone 專案後，仍需依上述步驟準備原始檔並產生輸出。
+程式、操作文件與資料格式會透過 GitHub 同步。
+
+## 使用範圍
+
+原始資料的授權仍待確認。目前只在開發電腦上使用這一場比賽進行測試，不公開提供原始檔、
+完整匯出 JSON 或含這些資料的網站。增加使用或分享範圍前，需先確認來源授權。
+
+需要了解欄位與轉換方式時，可參考 [SportVU 原始欄位](../docs/sportvu-fields.md)
+與 [Backend JSON 規格](../docs/data-contract.md)。
