@@ -2,9 +2,9 @@
 
 MM 課程專案，透過籃球追蹤資料分析球員移動與戰術，並以視覺化呈現分析結果。
 
-目前已完成 S1 Backend 的單場 SportVU 解析與 JSON 匯出，Frontend 尚未實作。
+目前已完成 S1 Backend 的單場 SportVU 解析、JSON 匯出，以及讀取該輸出的本機球場預覽。
 資料來源為 NBA SportVU 2015–16，現階段僅作本機小規模技術驗證，授權仍待確認。
-執行方式與交接資訊見 [S1 Backend](docs/backend-s1.md)，資料管理見 [資料說明](data/README.md)。
+執行方式見 [S1 Backend](docs/backend-s1.md) 與 [本機球場預覽](docs/local-viewer.md)，資料管理見 [資料說明](data/README.md)。
 
 開發依據與前後端規劃見 [開發文件](docs/README.md)，包含簡報比較、系統架構、
 資料交換規格與 S1 實作計畫。
@@ -13,7 +13,7 @@ MM 課程專案，透過籃球追蹤資料分析球員移動與戰術，並以�
 
 | 階段 | 內容 | 狀態 |
 | --- | --- | --- |
-| S1 | 追蹤資料整理、2D 球場與球員軌跡視覺化 | Backend 已可匯出真實事件；Frontend 待開發 |
+| S1 | 追蹤資料整理、2D 球場與球員軌跡視覺化 | 真實事件已可本機回放，待雙人核對與展示驗收 |
 | S2 | 球員時空關係、移動模式與基礎戰術分析 | 尚未開發 |
 | S3 | 串接 LLM，產生有資料依據的戰術解釋 | 尚未開發 |
 
@@ -28,8 +28,9 @@ basketball-tactics/
 │   ├── raw/                 # 原始資料
 │   └── processed/           # 處理後資料
 ├── outputs/                 # 圖表與分析輸出
+├── frontend/                # 本機 Canvas 預覽，無 build 或框架依賴
 ├── src/basketball_tactics/   # Python 程式
-├── tests/                   # 環境測試
+├── tests/                   # 環境、資料與預覽測試
 ├── .vscode/                 # 編輯器設定
 ├── .python-version
 ├── pyproject.toml
@@ -86,8 +87,35 @@ python3.12 -m venv .venv
 ```
 
 每台電腦各自建立 `.venv`。目前 Windows 環境已驗證，macOS 尚待實機驗證。
-現有 4 個環境測試與 24 個 Backend 案例；Backend 測試需本機真實 sample，未取得時會明確
+Python 測試另含本機預覽路由；資料相關案例需要真實 sample／匯出，未取得時會明確
 skip。設定 SPORTVU_SAMPLE、匯出指令及驗證結果見 [Backend 文件](docs/backend-s1.md)。
+
+## 開啟球場預覽
+
+先依 Backend 文件取得單場資料並匯出 `outputs/s1-event-2/`。資料不隨 Git clone 提供。
+這台 ASUS 已有匯出，可直接在專案根目錄執行：
+
+```powershell
+# Windows
+.\.venv\Scripts\python.exe -m basketball_tactics.preview --data-dir outputs/s1-event-2
+```
+
+```bash
+# macOS
+.venv/bin/python -m basketball_tactics.preview --data-dir outputs/s1-event-2
+```
+
+瀏覽器開啟 `http://127.0.0.1:8000/`，終端機按 Ctrl+C 停止。可播放、拖曳、逐格檢視、
+選取球員與切換軌跡。這是本機整合用的 HTML／JavaScript／Canvas 預覽，組員仍可選擇
+後續 Frontend 技術。無需 npm、LLM 或 API Key；授權未釐清前不部署至公開網站。
+
+純 JavaScript 資料邏輯測試使用 Node.js 22 或更新版本（執行預覽不需要 Node.js）：
+
+```bash
+node --test tests/test_viewer_model.mjs
+```
+
+操作、資料限制與測試結果見 [本機預覽文件](docs/local-viewer.md)。
 
 ### VS Code
 

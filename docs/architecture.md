@@ -1,15 +1,15 @@
 # 系統架構與分工
 
 狀態：S1 Backend 已實作單場解析與 JSON 匯出，見 [執行文件](backend-s1.md)。Backend 由主要開發者負責資料處理與
-戰術分析，Frontend 由另一位組員負責。Frontend 尚無現成程式；HTML／JavaScript／Canvas
-僅為 S1 暫定選項，框架、傳輸及部署方式由組員確認後再整合。
+戰術分析，Frontend 由另一位組員負責。目前先提供 HTML／JavaScript／Canvas
+[本機預覽](local-viewer.md) 作為整合起點，後續框架與部署方式仍由兩人確認。
 需求依據見 [簡報整理](requirements.md)，來源對照的資料草案見 [data-contract.md](data-contract.md)。
 
 ## S1 的開發方式
 
 目前優先對齊 Python Backend 輸出的 JSON，讓 Frontend 不必直接理解 SportVU tuple。
 SportVU 已核定用於本機小規模驗證，授權仍待確認，見 [資料評估](sportvu-assessment.md)。
-資料可用檔案、HTTP 或 API 傳遞，本階段不決定整套技術架構，也不開始實作 Frontend。
+本機預覽透過僅監聽 127.0.0.1 的 Python 靜態服務讀取指定匯出；這不代表正式 API 或部署架構定案。
 
 ```mermaid
 flowchart LR
@@ -33,25 +33,29 @@ S1 不依賴戰術模型或 LLM API；前後端確認資料規格後才安排整
 | 範圍 | 建議 | 現況 |
 | --- | --- | --- |
 | Backend | Python 3.12、ijson 串流解析，pathlib 處理路徑 | 已完成首個真實事件匯出 |
-| Frontend | HTML、JavaScript、Canvas 暫定，組員可另選框架 | 尚無現成程式，本階段不實作 |
+| Frontend | HTML、JavaScript、Canvas，組員可另選框架 | 本機預覽可讀取 0.2.0 真實匯出 |
 | 資料交換 | UTF-8 JSON，含版本、單位、時間、隊伍、球與軌跡 | SportVU 對照草案 0.2.0 |
-| 傳輸與展示 | 檔案、HTTP 或 API | 待 Frontend 組員確認 |
+| 傳輸與展示 | 本機 HTTP 提供指定 JSON 與頁面 | 僅本機；正式傳輸方式待組員確認 |
 | 分析／LLM | S2／S3 才追加必要工具 | 尚未選型或安裝 |
 
 Canvas 是可選的 2D 繪圖方式，參考
 [Canvas API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)。
-目前 Backend 維持三個小型模組，Frontend 目錄與工具待組員決定；analysis／explanation 尚未建立：
+目前目錄如下；analysis／explanation 尚未建立：
 
 ```text
 src/basketball_tactics/
 ├── sportvu.py           # 單場串流讀取與來源驗證
 ├── backend.py           # 時間、位置、品質與軌跡匯出
 ├── cli.py               # 本機匯出入口
+├── preview.py           # 本機預覽服務，不開放整個 repo
 ├── analysis/            # S2 才建立
 └── explanation/         # S3 才建立
 tests/
 ├── test_environment.py
-└── test_sportvu_backend.py
+├── test_sportvu_backend.py
+├── test_preview.py
+└── test_viewer_model.mjs
+frontend/                # HTML／CSS／JS 模組；無 build 工具
 outputs/                 # 本機匯出資料；不進 Git
 ```
 
@@ -80,10 +84,10 @@ Frontend 不依賴原始資料集欄位，也不自行重做單位或攻守方�
 1. 使用已核定本機驗證的既有單場原檔與來源 hash，不擴大下載或公開散布。
 2. Backend 保存來源、ID、時間基準及品質紀錄，選取一段可核對的短視窗。
 3. 依 0.2.0 草案提供 clip 清單、球員／隊伍 metadata、逐影格位置、球與軌跡索引。
-4. Frontend 組員確認技術與載入方式後，雙方再定檔案路徑或 API 介面。
+4. 先用本機預覽驗證既有 JSON；Frontend 組員可沿用或替換呈現層，再討論正式 API。
 5. 核對 ID、位置、時間、缺漏與軌跡連續性，完成展示驗收。
 
-Backend 已有可執行入口與 JSON，server、打包與部署方式仍不在本階段定案。
+Backend 已有可執行入口與 JSON，本機靜態服務只作小規模整合驗證，正式打包與部署尚未定案。
 播放依 source timestamp 差建立的時間軸，不以畫面更新率或倒數 game clock 取代資料時間。
 座標保留原值，不插值，也不跨缺漏連線；顯示端的方向映射待單場畫面核對後另訂。
 
