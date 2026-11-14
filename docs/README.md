@@ -10,6 +10,7 @@
 | [資料交換規格](data-contract.md) | S1 JSON 草案、座標與時間定義、缺漏處理 |
 | [S1 實作計畫](s1-plan.md) | 工作順序、交付物、測試與完成條件 |
 | [S1 Backend 執行與交接](backend-s1.md) | 命令、測試、記憶體實測與 Frontend 交付限制 |
+| [同場多事件驗證](multi-event-validation.md) | 指定比賽 489 個事件的轉換、拒絕原因與重跑方式 |
 | [SportVU 候選來源評估](sportvu-assessment.md) | 可下載性、單場 sample、品質與 S1–S3 適用性 |
 | [SportVU 原始欄位](sportvu-fields.md) | 實測 raw 欄位、解讀依據與未知項目 |
 

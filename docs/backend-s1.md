@@ -105,6 +105,10 @@ manifest 的 path 相對於 manifest 所在目錄。若事件有間隙、timesta
 
 ## 測試
 
+原始 event 2 與邊界案例之外，另有整場 489 個事件的逐筆核對。結果、真實缺漏案例與
+重跑腳本見 [同場多事件驗證](multi-event-validation.md)。目前環境與 Backend 共 43 個測試，
+「本次實測」表中的 28 個案例是 2026-11-13、增加全場驗證前的紀錄。
+
 ```powershell
 # 將 SPORTVU_SAMPLE 設為真實單場檔案的實際路徑
 $env:SPORTVU_SAMPLE = (Resolve-Path data/raw/0021500476.json).Path

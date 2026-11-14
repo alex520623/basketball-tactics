@@ -86,8 +86,10 @@ python3.12 -m venv .venv
 ```
 
 每台電腦各自建立 `.venv`。目前 Windows 環境已驗證，macOS 尚待實機驗證。
-現有 4 個環境測試與 24 個 Backend 案例；Backend 測試需本機真實 sample，未取得時會明確
-skip。設定 SPORTVU_SAMPLE、匯出指令及驗證結果見 [Backend 文件](docs/backend-s1.md)。
+測試包含環境 4 個、原有 Backend 案例 24 個與同場多事件案例 15 個。
+資料相關案例需要真實比賽原檔；未提供時顯示 `skipped`，表示那些案例尚未執行。
+匯出方式見 [Backend 文件](docs/backend-s1.md)，489 個事件的結果與重跑步驟見
+[同場多事件驗證](docs/multi-event-validation.md)。
 
 ### VS Code
 
