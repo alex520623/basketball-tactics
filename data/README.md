@@ -1,34 +1,40 @@
-# 資料管理
+# 資料準備
 
-S1 使用 [NBA-Player-Movements](https://github.com/linouk23/NBA-Player-Movements)
-提供的 NBA SportVU 2015–16 追蹤資料。
-可下載性、單場 sample、格式與限制見
-[評估報告](../docs/sportvu-assessment.md)，原始欄位與輸出草案見
-[欄位查核](../docs/sportvu-fields.md) 與 [Backend JSON 規格](../docs/data-contract.md)。
+S1 使用 NBA SportVU 2015–16 籃球追蹤資料。第一次執行時，需要先準備一場比賽的原始檔，
+再用 Backend 轉成球場回放介面能讀取的 JSON。
 
-## 準備開發資料
+## 要準備哪份資料？
 
-1. 第一個測試片段為 2015-12-30 Lakers at Celtics，game ID `0021500476`、eventId="2"。
-2. 依 [單場 sample 說明](../docs/sportvu-assessment.md#已驗證的單場-sample) 取得並解壓該場檔案。
-   只需這一場，不必下載全部比賽。已有相同原檔時可直接使用，不必重複下載。
-3. 建議放置於 `data/raw/0021500476.json`；若檔案在其他位置，將匯出命令的 `--input`
-   改為實際路徑。以文件記錄的 SHA-256 核對檔案。
-4. 依 [S1 Backend](../docs/backend-s1.md) 匯出 JSON，再依 [球場回放](../docs/local-viewer.md) 啟動介面。
+目前使用 **2015-12-30 湖人對塞爾提克**，比賽編號為 `0021500476`。
+原始檔來自 [NBA-Player-Movements](https://github.com/linouk23/NBA-Player-Movements)，
+單場下載連結與檔案核對資訊見 [測試比賽說明](../docs/sportvu-assessment.md#已驗證的單場-sample)。
+只需下載這一場，解壓後的檔名是 `0021500476.json`。
 
-Git clone 只取得程式與文件，不包含比賽原檔或完整衍生 JSON。每位組員須在各自電腦完成
-上述步驟，使用相同來源 hash、eventId 與轉換參數，才能重現相同片段。
+## 取得檔案後怎麼執行？
 
-## 儲存位置
+1. 將 `0021500476.json` 放進專案的 `data/raw/`。
+2. 按照 [Backend 匯出步驟](../docs/backend-s1.md#匯出)，匯出事件編號 `2` 的片段。
+3. 完成後會產生 `outputs/s1-event-2/`，裡面有片段清單與球員位置資料。
+4. 按照 [球場回放操作說明](../docs/local-viewer.md#啟動) 啟動服務，即可在瀏覽器查看回放。
 
-- `raw/`：正式取得的原始資料，保持原樣，不提交 Git。
-- `processed/`：清理結果、欄位映射、來源 hash 與品質報告，不提交 Git。
-- 根目錄 `outputs/`：匯出資料、圖表、影片與分析結果，不提交 Git。
+已有原始檔時可直接使用，不必重複下載；檔案放在其他位置時，將匯出命令的 `--input`
+改成該檔案的路徑。已產生上述輸出時，可直接從第 4 步啟動回放。
+
+## 這幾個資料夾各放什麼？
+
+| 路徑（相對於專案根目錄） | 用途 | 檔案怎麼來 |
+| --- | --- | --- |
+| `data/raw/` | 存放比賽原始檔，例如 `0021500476.json` | 下載並解壓後放入 |
+| `outputs/s1-event-2/` | 存放回放介面讀取的片段清單與位置 JSON | 執行 Backend 匯出命令後自動產生 |
+| `data/processed/` | 預留給後續資料處理使用，目前尚未使用 | 目前不需要放任何檔案 |
+
+這些資料檔不會上傳到 GitHub。組員 clone 專案後，仍需依上述步驟準備原始檔並產生輸出。
+程式、操作文件與資料格式會透過 GitHub 同步。
 
 ## 使用範圍
 
-資料授權仍待確認。目前僅進行開發電腦上的小規模技術驗證，不公開散布原始資料或完整衍生
-JSON，也不將其部署到公開網站。擴大資料使用、共享及課堂展示範圍前，須先確認來源授權。
+原始資料的授權仍待確認。目前只在開發電腦上使用這一場比賽進行測試，不公開提供原始檔、
+完整匯出 JSON 或含這些資料的網站。增加使用或分享範圍前，需先確認來源授權。
 
-資料版本、來源 commit、單場 hash、sample 範圍與執行參數已記錄於上述文件。
-組員各自依允許範圍取得資料，程式路徑使用 pathlib，
-不寫死磁碟機或個人目錄。測試樣本需先確認可提交範圍；大型 raw 與輸出不進 repository。
+需要了解欄位與轉換方式時，可參考 [SportVU 原始欄位](../docs/sportvu-fields.md)
+與 [Backend JSON 規格](../docs/data-contract.md)。
