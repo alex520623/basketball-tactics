@@ -1,13 +1,12 @@
-# SportVU 候選資料來源評估
+# SportVU 資料來源評估
 
-調查日期：2026-11-12。候選來源為使用者指定的
+資料來源為
 [linouk23/NBA-Player-Movements](https://github.com/linouk23/NBA-Player-Movements)，
-調查版本固定為 `f7d4cf2c7e607029abfd5715a0d4073bedae328e`。
-原調查時為待決定採用的候選。**2026-11-13 更新**：使用者已核定 S1 本機小規模
-技術驗證，授權仍待確認，不公開散布 raw。下列保留原調查結果，Backend 實作見
-[執行文件](backend-s1.md)。
+查核版本為 `f7d4cf2c7e607029abfd5715a0d4073bedae328e`。
+此來源已用於 S1 的單場解析與球場回放，使用範圍見 [資料準備](../data/README.md)。
+以下下載與全場統計為 2026-11-12 的查核結果；event 2 的 Backend 結果見 [執行文件](backend-s1.md)。
 
-此次調查的來源版本、檔案 hash 與統計收據見 [sportvu-audit.json](sportvu-audit.json)。
+來源版本、檔案 hash 與統計紀錄見 [sportvu-audit.json](sportvu-audit.json)。
 
 ## 結論
 
@@ -20,7 +19,7 @@ S3 可在已驗證的量測與規則上產生解釋，但原始追蹤檔本身�
 
 ## 下載狀態與範圍
 
-GitHub API 檔案樹與 raw 下載均可用。此次只下載一場壓縮檔與少量讀取程式／metadata，
+2026-11-12 查核時，GitHub API 檔案樹與 raw 下載均可用。查核只下載一場壓縮檔與少量讀取程式／metadata，
 未 clone 整個 repository，也未進行全資料集下載。
 
 | 項目 | 此次查核結果 |
@@ -37,7 +36,7 @@ GitHub API 檔案樹與 raw 下載均可用。此次只下載一場壓縮檔與�
 不能宣稱所有檔案都可用，也不能由檔案清單推得每場資料完整率。
 
 原始路徑見 [資料目錄](https://github.com/linouk23/NBA-Player-Movements/tree/master/data/2016.NBA.Raw.SportVU.Game.Logs)。
-後續採用時應指定 commit 與單一檔案，不直接整庫 clone。
+下載時使用上述版本的指定單場檔案，無需 clone 整個資料庫。
 
 ## 已驗證的單場 sample
 
@@ -53,15 +52,15 @@ GitHub API 檔案樹與 raw 下載均可用。此次只下載一場壓縮檔與�
 | 壓縮檔 SHA-256 | `8e622df1fe6909773617a5691a94925bf5624375e106da5801c28fd252890e78` |
 | JSON SHA-256 | `5ad649c3b741cc45c01c586cbf073d56d67da0f2315fe7acedb477bc43116036` |
 | 事件 | 489，其中 484 個有 moments、5 個為空 |
-| 候選展示視窗 | `events[1]`，`eventId="2"`，第 1 節，525 個 moments |
+| S1 測試片段 | `events[1]`，`eventId="2"`，第 1 節，525 個 moments |
 | 視窗時間 | timestamp 差 20,959 ms；game clock 從 719.47 至 698.20 秒 |
 
-該候選視窗的 moment timestamp 嚴格遞增，相鄰差為 30–50 ms 範圍，且每個 moment 均有
-球與 10 名球員。這只是結構篩選通過，尚未人工驗證戰術、攻守方向或畫面效果。
+此片段的 timestamp 嚴格遞增，相鄰差為 39、40 或 41 ms，每筆均有球與 10 名球員。
+已完成 Backend 與回放介面的串接測試；攻守方向與戰術意義仍待人工核對。
 `event_index=1` 與 `eventId="2"` 是不同欄位；該視窗不能直接稱為完整進攻回合。
 
-下載與解壓檔保留在本機 `.tools/sportvu-review/`，未放進 `data/raw/`，也不提交 Git。
-選定資料來源後，再記錄正式取得方式與檔案位置。
+下載、解壓與放置步驟見 [資料準備](../data/README.md)。建議將原檔放在
+`data/raw/0021500476.json`，再執行 Backend 匯出；已有同一檔案時可指定其實際路徑。
 
 ## 單場資料品質實測
 
@@ -123,4 +122,4 @@ play-by-play 若要加入，應視為額外來源，先驗證是否可取得、I
 後續資料使用範圍依 [資料管理](../data/README.md)，其他比賽與進階分析需另作驗證。
 
 原始欄位見 [SportVU 欄位查核](sportvu-fields.md)；Backend 輸出見
-[資料交換規格 0.2.0 草案](data-contract.md)。
+[資料交換規格 0.2.0](data-contract.md)。

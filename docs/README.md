@@ -7,11 +7,11 @@
 | --- | --- |
 | [需求與簡報比較](requirements.md) | 來源摘要、兩版差異、階段範圍與需求對照 |
 | [系統架構與分工](architecture.md) | Backend／Frontend 邊界、資料流程與技術建議 |
-| [資料交換規格](data-contract.md) | S1 JSON 草案、座標與時間定義、缺漏處理 |
+| [資料交換規格](data-contract.md) | 已實作的 S1 JSON 0.2.0、座標與時間定義、缺漏處理 |
 | [S1 實作計畫](s1-plan.md) | 工作順序、交付物、測試與完成條件 |
 | [S1 Backend 執行與交接](backend-s1.md) | 命令、測試、記憶體實測與 Frontend 交付限制 |
 | [S1 球場回放](local-viewer.md) | 啟動、操作、時間／座標映射與整合驗證 |
-| [SportVU 候選來源評估](sportvu-assessment.md) | 可下載性、單場 sample、品質與 S1–S3 適用性 |
+| [SportVU 資料來源評估](sportvu-assessment.md) | 單場下載資訊、品質與 S1–S3 適用性 |
 | [SportVU 原始欄位](sportvu-fields.md) | 實測 raw 欄位、解讀依據與未知項目 |
 
 ## 目前開發狀態

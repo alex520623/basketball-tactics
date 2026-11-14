@@ -24,9 +24,9 @@ Frontend 組員可以沿用此介面或另選技術，Backend 資料介面保持
 
 ## 啟動
 
-在 repository 根目錄完成 README 的 Python 環境安裝。先依 [Backend 文件](backend-s1.md)
-產生 `outputs/s1-event-2/manifest.json` 與 clips；缺少真實資料時不產生替代畫面。
-raw 與衍生輸出不進 Git，另一台電腦需自行取得允許使用的單場資料並執行匯出。
+先完成 [README](../README.md) 的環境安裝，以及 [Backend 匯出步驟](backend-s1.md#匯出)。
+確認 `outputs/s1-event-2/manifest.json` 與 `clips/` 已產生，再從專案根目錄執行下列命令。
+另一台電腦需先依 [資料準備](../data/README.md) 取得原檔並執行匯出。
 
 ```powershell
 .\.venv\Scripts\python.exe -m basketball_tactics.preview --data-dir outputs/s1-event-2
@@ -61,22 +61,27 @@ raw 與衍生輸出不進 Git，另一台電腦需自行取得允許使用的單
 ## 測試與重現
 
 ```powershell
+$env:SPORTVU_SAMPLE = (Resolve-Path data/raw/0021500476.json).Path
 .\.venv\Scripts\python.exe -m pytest -q
 .\.venv\Scripts\python.exe -m pip check
 node --test tests/test_viewer_model.mjs
 ```
 
 ```bash
-.venv/bin/python -m pytest -q
+SPORTVU_SAMPLE="data/raw/0021500476.json" .venv/bin/python -m pytest -q
 .venv/bin/python -m pip check
 node --test tests/test_viewer_model.mjs
 ```
 
-JS 測試需 Node.js 22+，本次使用 24.19.0。`SPORTVU_EXPORT` 可指定同一 event 2 匯出的
-其他目錄，`SPORTVU_SAMPLE` 指定原始單場。未設定且本機沒有 sample／匯出時，對應案例
-明確 skip；明確設定卻缺檔或格式不符則失敗。沒有將 raw fixture 或完整輸出提交 Git。
+JS 測試需 Node.js 22+，驗證環境使用 24.19.0。上述命令假設原檔位於 `data/raw/`、匯出位於
+`outputs/s1-event-2/`。原檔路徑不同時請修改 `SPORTVU_SAMPLE`；匯出目錄不同時，先將
+`SPORTVU_EXPORT` 環境變數設為該目錄，Python 與 JS 測試都會讀取它。
 
-本次 Windows 結果：Python **37 passed**（含原有 28 案例），JS **7 passed**，無 skip；
+測試顯示 `skipped` 表示缺少對應資料，該案例尚未執行。若明確指定的檔案或目錄不存在、
+格式不符，則會失敗。測試使用的原始資料與匯出檔不隨 Git clone 提供。
+
+2026-11-14 Windows 測試結果：Python **37 passed**（含環境與 Backend 的 28 案例），
+JS **7 passed**，無 skip；
 `pip check` 通過。JS 逐一檢查全部 524 個非固定間隔邊界，並驗證視窗軌跡、缺漏中斷、
 錯誤版本／路徑、異常值、負座標及畫面翻轉；故障注入使用真實事件複本，未作展示資料。
 

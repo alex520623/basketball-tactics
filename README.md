@@ -90,8 +90,8 @@ python3.12 -m venv .venv
 ```
 
 每台電腦各自建立 `.venv`。目前 Windows 環境已驗證，macOS 尚待實機驗證。
-Python 測試另含回放服務路由；資料相關案例需要真實 sample／匯出，未取得時會明確
-skip。設定 SPORTVU_SAMPLE、匯出指令及驗證結果見 [Backend 文件](docs/backend-s1.md)。
+資料相關測試需要比賽原檔與匯出 JSON。尚未準備資料時，會顯示 `skipped`，表示那些案例
+未執行。準備資料後，依 [測試步驟](docs/local-viewer.md#測試與重現) 設定檔案路徑再執行。
 
 ## 執行球場回放
 

@@ -10,7 +10,7 @@ S1 Backend 將 SportVU 單場事件轉為 JSON 0.2.0，保留球員、球隊、�
 | --- | --- |
 | `src/basketball_tactics/sportvu.py` | 串流讀取單場，依 eventId 選事件，驗證來源與 hash |
 | `src/basketball_tactics/backend.py` | 位置與時間映射、品質處理、軌跡分段、manifest 與 clip 匯出 |
-| `src/basketball_tactics/cli.py` | 本機命令列入口與錯誤回報 |
+| `src/basketball_tactics/cli.py` | 執行匯出的命令列入口與錯誤回報 |
 | `tests/test_sportvu_backend.py` | 真實事件回歸測試及真實資料複本的故障注入 |
 
 解析使用 [ijson](https://pypi.org/project/ijson/)，依序建立單個 event，而非整場 JSON 的 Python
@@ -67,7 +67,7 @@ event 大小增加。來源 hash 以串流計算，不讀入全部檔案 bytes�
   --expected-sha256 5ad649c3b741cc45c01c586cbf073d56d67da0f2315fe7acedb477bc43116036
 ```
 
-`--gap-threshold-ms` 必填；120 ms 是本次採用的工程參數，約為 nominal 40 ms 的三倍，
+`--gap-threshold-ms` 必填；上述命令採用 120 ms，約為 nominal 40 ms 的三倍，
 不是 SportVU 來源標註，也不會把 timestamp 強制改成 40 ms。`--coordinate-limit-ft`
 預設 1000，作為極端數值保護，可明確調整；94×50 邊界外的合理位置仍保留並警告。
 commit 未提供時輸出 null；只有確認過來源版本才傳入該參數。
@@ -85,7 +85,10 @@ manifest 的 path 相對於 manifest 所在目錄。若事件有間隙、timesta
 多個 `s001`、`s002` clip，每個從 t_ms=0 開始，均保留原始 eventId、timestamp 與 moment
 索引。來源衝突、空事件、hash 不符或格式無法讀取會回報失敗，不發布完整輸出目錄。
 
-## 本次實測
+## 指定比賽的驗證結果
+
+以下為 2026-11-13 的 Backend 與環境測試紀錄。加入回放服務後，Python 測試總數為 37；
+另有 7 個 JavaScript 案例，結果見 [回放測試紀錄](local-viewer.md#測試與重現)。
 
 | 項目 | 結果 |
 | --- | --- |
@@ -98,7 +101,7 @@ manifest 的 path 相對於 manifest 所在目錄。若事件有間隙、timesta
 | 清理結果 | 本事件無丟棄 moment、無 timestamp 去重，場外位置原樣保留 |
 | clip 大小 | 732,056 bytes，約 715 KiB |
 | Windows 記憶體 | 單次匯出峰值工作集約 31 MiB，含 Python／parser；約 4.2 秒 |
-| 測試 | 28 passed，pip check 通過 |
+| 當時的測試範圍 | 環境 4 個＋Backend 24 個，共 28 passed；pip check 通過 |
 
 記憶體與時間僅為本次單場、單程序量測，不是全資料或所有平台的保證。macOS 尚未實測。
 場外位置不能據此判定是發球或誤追蹤，畫面與戰術意義仍需人工核對。
@@ -113,7 +116,7 @@ $env:SPORTVU_SAMPLE = (Resolve-Path data/raw/0021500476.json).Path
 ```
 
 ```bash
-SPORTVU_SAMPLE="/absolute/path/0021500476.json" .venv/bin/python -m pytest -q
+SPORTVU_SAMPLE="data/raw/0021500476.json" .venv/bin/python -m pytest -q
 .venv/bin/python -m pip check
 ```
 
@@ -122,8 +125,9 @@ SPORTVU_SAMPLE="/absolute/path/0021500476.json" .venv/bin/python -m pytest -q
 極端座標、重複 ID、空時鐘、壞 moment、重複 timestamp、回退、跨節與時間間隙。
 沒有提交 raw fixture，也沒有以合成資料代替正式 sample。
 
-預設 sample 不在新 clone 內；未提供 sample 時 Backend 測試會明確 skip，不能視為 Backend
-驗證通過。若明確設定 SPORTVU_SAMPLE 卻不存在，則測試失敗；hash 不同也失敗。
+`SPORTVU_SAMPLE` 用來告訴測試程式原始比賽檔的位置。若檔案放在其他目錄，請替換上述路徑。
+未指定時，測試程式會嘗試開發快取路徑 `.tools/sportvu-review/0021500476.json`；找不到則顯示
+`skipped`，表示尚未檢查資料相關案例。明確指定的檔案不存在或 hash 不同時，測試會失敗。
 
 ## Frontend 交接
 
@@ -135,4 +139,4 @@ Frontend 可以依 teams、players、frames、trajectories 讀取真實事件，
 - 畫面應使用 t_ms；比賽倒數與 shot clock 另作標籤。
 - 缺球用 null，缺席球員沒有點；依 break_before／segments 中斷軌跡，不跨缺漏連線。
 - 展示品質警告；場外點可保留在有邊界留白的畫面，不能靜默改寫數值。
-- 此交付是 Backend 資料已可供整合，不代表 S1 網頁與畫面驗收已完成。
+- 回放介面已能讀取此輸出，接下來由兩人依 [S1 驗收步驟](s1-plan.md#接下來的共同驗收) 核對畫面。
