@@ -5,6 +5,9 @@ MM 課程專案，透過籃球追蹤資料分析球員移動與戰術，並以�
 S1 已支援 SportVU 單場事件解析、標準化 JSON 匯出，以及 2D 球場與球員軌跡回放。
 可播放、暫停、逐格檢視、拖曳時間、調整速度、選取球員，並查看資料品質警告。
 
+換電腦接續開發請先看 [交接指南](docs/handoff.md)。目前整合回放與全場驗證的版本位於
+`handoff/s1-development` 分支，尚未合併到 `main`。
+
 執行方式見 [S1 Backend](docs/backend-s1.md) 與 [球場回放](docs/local-viewer.md)。
 資料來源、取得方式與使用範圍見 [資料管理](data/README.md)。
 
@@ -58,7 +61,7 @@ gh auth login --hostname github.com --git-protocol https --web
 ### Windows（PowerShell）
 
 ```powershell
-git clone https://github.com/alex520623/basketball-tactics.git
+git clone --branch handoff/s1-development https://github.com/alex520623/basketball-tactics.git
 cd basketball-tactics
 py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
@@ -81,7 +84,7 @@ $projectPython = Get-ChildItem .tools/python -Filter python.exe -Recurse | Selec
 先安裝符合電腦架構的 Python 3.12，再執行：
 
 ```bash
-git clone https://github.com/alex520623/basketball-tactics.git
+git clone --branch handoff/s1-development https://github.com/alex520623/basketball-tactics.git
 cd basketball-tactics
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
@@ -90,8 +93,10 @@ python3.12 -m venv .venv
 ```
 
 每台電腦各自建立 `.venv`。目前 Windows 環境已驗證，macOS 尚待實機驗證。
-資料相關測試需要比賽原檔與匯出 JSON。尚未準備資料時，會顯示 `skipped`，表示那些案例
-未執行。準備資料後，依 [測試步驟](docs/local-viewer.md#測試與重現) 設定檔案路徑再執行。
+目前整合版本包含 52 個 Python 測試（環境 4、Backend 24、回放服務 9、全場驗證 15），
+另有 7 個 JavaScript 案例。資料相關測試需要比賽原檔與匯出 JSON；缺少資料時會顯示
+`skipped`，表示那些案例未執行。準備與驗證步驟見 [交接指南](docs/handoff.md)。
+489 個事件的處理結果見 [同場多事件驗證](docs/multi-event-validation.md)。
 
 ## 執行球場回放
 

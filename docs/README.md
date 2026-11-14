@@ -5,11 +5,13 @@
 
 | 文件 | 用途 |
 | --- | --- |
+| [換電腦交接指南](handoff.md) | 取得整合分支、準備資料、重建環境與啟動回放 |
 | [需求與簡報比較](requirements.md) | 來源摘要、兩版差異、階段範圍與需求對照 |
 | [系統架構與分工](architecture.md) | Backend／Frontend 邊界、資料流程與技術建議 |
 | [資料交換規格](data-contract.md) | 已實作的 S1 JSON 0.2.0、座標與時間定義、缺漏處理 |
 | [S1 實作計畫](s1-plan.md) | 工作順序、交付物、測試與完成條件 |
 | [S1 Backend 執行與交接](backend-s1.md) | 命令、測試、記憶體實測與 Frontend 交付限制 |
+| [同場多事件驗證](multi-event-validation.md) | 指定比賽 489 個事件的轉換、拒絕原因與重跑方式 |
 | [S1 球場回放](local-viewer.md) | 啟動、操作、時間／座標映射與整合驗證 |
 | [SportVU 資料來源評估](sportvu-assessment.md) | 單場下載資訊、品質與 S1–S3 適用性 |
 | [SportVU 原始欄位](sportvu-fields.md) | 實測 raw 欄位、解讀依據與未知項目 |
@@ -20,7 +22,7 @@
 
 - Backend 可串流解析 SportVU 單場並匯出指定 event 的 JSON 0.2.0。
 - Frontend 可回放真實片段，支援時間控制、球員選取、軌跡與品質警告。
-- Windows：Python 37 個測試與 JavaScript 7 個測試通過；macOS 與實驗室電腦待實測。
+- Windows 整合版本：Python 52 個測試與 JavaScript 7 個測試通過；macOS 與另一台電腦待實測。
 - 程式與文件由 GitHub 分支及 PR 同步；資料準備與匯出需在各開發環境完成。
 
 開始開發請先閱讀 [README](../README.md)、[資料管理](../data/README.md) 與對應功能文件。
