@@ -1,19 +1,18 @@
 # 系統架構與分工
 
-狀態：S1 Backend 已實作單場解析與 JSON 匯出，見 [執行文件](backend-s1.md)。Backend 由主要開發者負責資料處理與
-戰術分析，Frontend 由另一位組員負責。Frontend 尚無現成程式；HTML／JavaScript／Canvas
-僅為 S1 暫定選項，框架、傳輸及部署方式由組員確認後再整合。
-需求依據見 [簡報整理](requirements.md)，來源對照的資料草案見 [data-contract.md](data-contract.md)。
+S1 已串接 Python 資料處理與 HTML／JavaScript／Canvas [球場回放](local-viewer.md)。
+Backend 負責讀取與整理追蹤資料，Frontend 負責繪圖與互動；後續框架與部署方式由兩人共同確認。
+需求依據見 [簡報整理](requirements.md)，欄位定義見 [資料交換規格](data-contract.md)。
 
 ## S1 的開發方式
 
-目前優先對齊 Python Backend 輸出的 JSON，讓 Frontend 不必直接理解 SportVU tuple。
-SportVU 已核定用於本機小規模驗證，授權仍待確認，見 [資料評估](sportvu-assessment.md)。
-資料可用檔案、HTTP 或 API 傳遞，本階段不決定整套技術架構，也不開始實作 Frontend。
+Backend 先將 SportVU 的原始陣列轉為 JSON 0.2.0；Frontend 讀取此格式顯示位置與軌跡。
+資料準備與使用範圍見 [資料管理](../data/README.md)。
+回放介面透過僅監聽 127.0.0.1 的 Python 靜態服務讀取指定匯出；正式 API 與部署架構尚未定案。
 
 ```mermaid
 flowchart LR
-    A[SportVU 本機驗證資料] --> B[Backend：讀取與欄位對照]
+    A[SportVU 單場追蹤資料] --> B[Backend：讀取與欄位對照]
     B --> C[時間標準化與來源座標保留]
     C --> D[資料驗證與品質報告]
     D --> E[版本化 JSON]
@@ -26,36 +25,38 @@ flowchart LR
 ```
 
 JSON 欄位定義與傳輸方式分開，Frontend 可自行選擇符合此資料介面的技術。
-S1 不依賴戰術模型或 LLM API；前後端確認資料規格後才安排整合。
+S1 已透過 JSON 完成串接，執行回放不需要戰術模型或 LLM API。
 
-## 技術與目錄規劃
+## 技術與程式位置
 
 | 範圍 | 建議 | 現況 |
 | --- | --- | --- |
 | Backend | Python 3.12、ijson 串流解析，pathlib 處理路徑 | 已完成首個真實事件匯出 |
-| Frontend | HTML、JavaScript、Canvas 暫定，組員可另選框架 | 尚無現成程式，本階段不實作 |
-| 資料交換 | UTF-8 JSON，含版本、單位、時間、隊伍、球與軌跡 | SportVU 對照草案 0.2.0 |
-| 傳輸與展示 | 檔案、HTTP 或 API | 待 Frontend 組員確認 |
+| Frontend | HTML、JavaScript、Canvas，組員可另選框架 | 球場回放可讀取 0.2.0 真實匯出 |
+| 資料交換 | UTF-8 JSON，含版本、單位、時間、隊伍、球與軌跡 | 已實作 0.2.0 |
+| 傳輸與展示 | Python HTTP 服務提供介面與匯出的 JSON | 監聽 127.0.0.1，在啟動服務的電腦瀏覽 |
 | 分析／LLM | S2／S3 才追加必要工具 | 尚未選型或安裝 |
 
-Canvas 是可選的 2D 繪圖方式，參考
+目前使用 Canvas 繪製 2D 球場，參考
 [Canvas API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)。
-目前 Backend 維持三個小型模組，Frontend 目錄與工具待組員決定；analysis／explanation 尚未建立：
+目前的程式與測試位置如下：
 
 ```text
 src/basketball_tactics/
 ├── sportvu.py           # 單場串流讀取與來源驗證
 ├── backend.py           # 時間、位置、品質與軌跡匯出
-├── cli.py               # 本機匯出入口
-├── analysis/            # S2 才建立
-└── explanation/         # S3 才建立
+├── cli.py               # 執行資料匯出的命令列入口
+└── preview.py           # 提供回放介面與指定 JSON 的 HTTP 服務
 tests/
 ├── test_environment.py
-└── test_sportvu_backend.py
-outputs/                 # 本機匯出資料；不進 Git
+├── test_sportvu_backend.py
+├── test_preview.py
+└── test_viewer_model.mjs
+frontend/                # HTML／CSS／JS 模組；無 build 工具
+outputs/                 # Backend 自動產生的回放資料；不提交 Git
 ```
 
-目前僅支援 SportVU JSON，不建立多資料集插件系統。
+S2 分析與 S3 解釋模組尚未建立。資料讀取目前支援 SportVU JSON。
 SportVU 已實測欄位見 [原始欄位查核](sportvu-fields.md)，其他比賽仍須確認品質。
 
 ## Backend／Frontend 責任
@@ -77,13 +78,12 @@ Frontend 不依賴原始資料集欄位，也不自行重做單位或攻守方�
 
 ## S1 的資料交接
 
-1. 使用已核定本機驗證的既有單場原檔與來源 hash，不擴大下載或公開散布。
-2. Backend 保存來源、ID、時間基準及品質紀錄，選取一段可核對的短視窗。
-3. 依 0.2.0 草案提供 clip 清單、球員／隊伍 metadata、逐影格位置、球與軌跡索引。
-4. Frontend 組員確認技術與載入方式後，雙方再定檔案路徑或 API 介面。
-5. 核對 ID、位置、時間、缺漏與軌跡連續性，完成展示驗收。
+1. 依 [資料準備](../data/README.md) 取得指定比賽，以 SHA-256 確認兩人使用同一份原檔。
+2. 依 [Backend 命令](backend-s1.md#匯出) 匯出 eventId="2"，產生片段清單與位置 JSON。
+3. Frontend 讀取 teams、players、frames 與 trajectories；欄位意義見 [資料規格](data-contract.md)。
+4. 兩人一起核對影格、球員、位置與軌跡，記錄畫面差異。
 
-Backend 已有可執行入口與 JSON，server、打包與部署方式仍不在本階段定案。
+目前使用 Python 靜態服務連接前後端；尚未安排線上部署。
 播放依 source timestamp 差建立的時間軸，不以畫面更新率或倒數 game clock 取代資料時間。
 座標保留原值，不插值，也不跨缺漏連線；顯示端的方向映射待單場畫面核對後另訂。
 
@@ -94,7 +94,7 @@ S2 延用 S1 的標準資料，先定義與人工可核對的距離、速度、�
 缺少球或攻守資訊時，不推論持球、傳球或戰術名稱。有標註後才定義類別與評估切分。
 
 S3 接收 S2 證據與版本化的知識規則，輸出帶證據引用的解釋；LLM 不直接補造軌跡、
-量測值或戰術標籤。資料不足須明示限制。API Key 僅留在 Backend 的本機環境，
+量測值或戰術標籤。資料不足須明示限制。API Key 由 Backend 的環境變數讀取，
 不交給 Frontend。S3 服務不可用時，S1／S2 仍能展示。
 
 S2／S3 的完整介面待各階段開始前定案，不要求 S1 提前輸出虛構分析。

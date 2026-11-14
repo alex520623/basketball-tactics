@@ -57,13 +57,13 @@
 | `[4]` | 全場均為 null | 語意未確認，保留 raw 值，不命名為 confidence 或 possession |
 | `[5]` | entities 陣列 | 通常球＋10 人，但 sample 存在缺球或缺球員 |
 
-`Moment.py` 直接讀取 `[0]`、`[2]`、`[3]`，並假設 `[5][0]` 為球。sample 中有缺球影格，
-因此正式 importer 不應直接照抄這項假設，而應檢查 entity 的 ID。
+原 repository 的 `Moment.py` 直接讀取 `[0]`、`[2]`、`[3]`，並假設 `[5][0]` 為球。
+這場資料存在缺球影格，因此目前 Backend 以 entity 的 ID 識別球，位置缺失時輸出 null。
 
 時間語意的交叉參考為原始 API client 的 [Moment 定義](https://github.com/bttmly/nba-movement#moment)
 與 [逐欄資料分析](https://danvatterott.com/creating-videos-of-nba-action-with-sportsvu-data.html)。
-兩者是格式參考，不代表舊 NBA API 目前仍能使用。S1 播放時間建議以 sample timestamp 差建立，
-並保留倒數時鐘作顯示；timestamp 並不等於可無誤對齊外部影片或 play-by-play 的時鐘。
+兩者用於解讀格式，本文未檢查舊 NBA API 的可用性。S1 播放時間已採用 timestamp 差，
+並保留倒數時鐘作顯示；與外部影片或 play-by-play 對齊時，仍須另外檢查時間偏移。
 
 ## entity tuple 與座標
 
@@ -93,10 +93,10 @@ Avery Bradley 同時的位置為 `[1610612738, 202340, 48.30817, 15.47903, 0.0]`
 - JSON 沒有內建單位、場地長寬或座標原點 metadata。
 - [使用同源 SportVU 的原始研究](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0281467)
   明述單位為 feet、採樣為 25 Hz。原展示程式也以長度 94、寬度 50 的球場範圍疊圖，
-  並多留發球空間。Backend 草案優先保留 feet 原值，標明單位依據而非聲稱是 JSON 欄位。
+  並多留發球空間。目前 Backend 保留 feet 原值，另以 metadata 記錄單位依據。
 - nominal 25 Hz 不等於每筆恰隔 40 ms。不要用 frame index × 40 覆蓋實際 timestamp 差。
-- source 原點與 y 軸對應畫面的方向，仍須在正式採用後用場地與片段核對。
-  不沿用舊草案的「已確認左下角」假設，也不自動鏡射成統一進攻方向。
+- 原點與 y 軸對應畫面的方向仍待核對，輸出標為 `display_orientation="unconfirmed"`。
+  回放介面預設 x 向右、y 向下，也可上下翻轉檢視；原始座標不變。
 - x／y 可在場外；Backend 保留來源值並標記，不靜默刪除或夾值。
 
 ## 沒有確認為來源欄位的資訊

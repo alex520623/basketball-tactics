@@ -2,9 +2,11 @@
 
 MM 課程專案，透過籃球追蹤資料分析球員移動與戰術，並以視覺化呈現分析結果。
 
-目前已完成 S1 Backend 的單場 SportVU 解析與 JSON 匯出，Frontend 尚未實作。
-資料來源為 NBA SportVU 2015–16，現階段僅作本機小規模技術驗證，授權仍待確認。
-執行方式與交接資訊見 [S1 Backend](docs/backend-s1.md)，資料管理見 [資料說明](data/README.md)。
+S1 已支援 SportVU 單場事件解析、標準化 JSON 匯出，以及 2D 球場與球員軌跡回放。
+可播放、暫停、逐格檢視、拖曳時間、調整速度、選取球員，並查看資料品質警告。
+
+執行方式見 [S1 Backend](docs/backend-s1.md) 與 [球場回放](docs/local-viewer.md)。
+資料來源、取得方式與使用範圍見 [資料管理](data/README.md)。
 
 開發依據與前後端規劃見 [開發文件](docs/README.md)，包含簡報比較、系統架構、
 資料交換規格與 S1 實作計畫。
@@ -13,7 +15,7 @@ MM 課程專案，透過籃球追蹤資料分析球員移動與戰術，並以�
 
 | 階段 | 內容 | 狀態 |
 | --- | --- | --- |
-| S1 | 追蹤資料整理、2D 球場與球員軌跡視覺化 | Backend 已可匯出真實事件；Frontend 待開發 |
+| S1 | 追蹤資料整理、2D 球場與球員軌跡視覺化 | 已串接真實事件，待共同核對與展示驗收 |
 | S2 | 球員時空關係、移動模式與基礎戰術分析 | 尚未開發 |
 | S3 | 串接 LLM，產生有資料依據的戰術解釋 | 尚未開發 |
 
@@ -28,16 +30,18 @@ basketball-tactics/
 │   ├── raw/                 # 原始資料
 │   └── processed/           # 處理後資料
 ├── outputs/                 # 圖表與分析輸出
+├── frontend/                # 球場回放介面（HTML／JavaScript／Canvas）
 ├── src/basketball_tactics/   # Python 程式
-├── tests/                   # 環境測試
+├── tests/                   # 環境、資料與回放測試
 ├── .vscode/                 # 編輯器設定
 ├── .python-version
 ├── pyproject.toml
 └── requirements.txt
 ```
 
-資料集與輸出檔案保留在各自的電腦，不提交 Git。資料取得方式與欄位定義記錄在
-`data/README.md`，供組員建立相同的資料環境。
+GitHub 提供程式與文件。組員 clone 後，先依下列步驟安裝環境，再依
+[資料準備說明](data/README.md) 下載指定比賽並產生回放資料。
+原始資料與產生的輸出不會隨 clone 下載；目前需在開發電腦上啟動，尚無線上展示網址。
 
 ## 環境安裝
 
@@ -86,8 +90,36 @@ python3.12 -m venv .venv
 ```
 
 每台電腦各自建立 `.venv`。目前 Windows 環境已驗證，macOS 尚待實機驗證。
-現有 4 個環境測試與 24 個 Backend 案例；Backend 測試需本機真實 sample，未取得時會明確
-skip。設定 SPORTVU_SAMPLE、匯出指令及驗證結果見 [Backend 文件](docs/backend-s1.md)。
+資料相關測試需要比賽原檔與匯出 JSON。尚未準備資料時，會顯示 `skipped`，表示那些案例
+未執行。準備資料後，依 [測試步驟](docs/local-viewer.md#測試與重現) 設定檔案路徑再執行。
+
+## 執行球場回放
+
+1. 依 [資料管理](data/README.md) 準備測試比賽原檔。
+2. 依 [Backend 匯出步驟](docs/backend-s1.md#匯出) 產生 `outputs/s1-event-2/`。
+3. 在專案根目錄執行以下命令。若已完成匯出，可直接啟動，不必重新產生資料。
+
+```powershell
+# Windows
+.\.venv\Scripts\python.exe -m basketball_tactics.preview --data-dir outputs/s1-event-2
+```
+
+```bash
+# macOS
+.venv/bin/python -m basketball_tactics.preview --data-dir outputs/s1-event-2
+```
+
+瀏覽器開啟 `http://127.0.0.1:8000/`，終端機按 Ctrl+C 停止。可播放、拖曳、逐格檢視、
+選取球員與切換軌跡。服務只監聽執行電腦的 `127.0.0.1`；其他電腦須各自 clone、安裝並啟動。
+介面採 HTML／JavaScript／Canvas，無需 npm、LLM 或 API Key，組員可依資料介面延伸開發。
+
+純 JavaScript 資料邏輯測試使用 Node.js 22 或更新版本（執行回放不需要 Node.js）：
+
+```bash
+node --test tests/test_viewer_model.mjs
+```
+
+操作、資料限制與測試結果見 [球場回放文件](docs/local-viewer.md)。
 
 ### VS Code
 

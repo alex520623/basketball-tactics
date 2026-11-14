@@ -1,11 +1,11 @@
 # Backend JSON 資料交換規格
 
-狀態：**0.2.0 本機 S1 Backend 已實作**。2026-11-13 使用者決定採用 SportVU 作本機小規模
-技術驗證，授權仍待確認；Frontend 技術與整合方式未定。本版已實作解析與匯出，沒有 API 或 Frontend。
+狀態：**0.2.0 已實作解析、匯出與回放串接**。目前 [球場回放](local-viewer.md)
+透過 HTTP 讀取此格式，正式 API 與部署方式尚未定案。資料使用範圍見 [資料管理](../data/README.md)。
 0.1.0 的純示意公尺／左下角設定由本版取代。
 
 原始欄位與確認程度見 [SportVU 欄位查核](sportvu-fields.md)，下載與品質結果見
-[候選來源評估](sportvu-assessment.md)。
+[資料來源評估](sportvu-assessment.md)。
 
 ## 原則與傳遞方式
 
@@ -18,8 +18,8 @@
 - 使用標準 UTF-8 JSON，不含 NaN／Infinity，也不把 null 改成 0。
 
 邏輯上定義「片段清單 manifest」與「片段 clip」。檔案模式下，path 相對於 manifest 解析，
-如 `clips/id.json`。是否使用本機檔案、HTTP 或 API 傳遞，待 Frontend 選型後共同決定；
-此時不要求任何 server 或網址已存在。
+如 `clips/id.json`。現有回放服務提供 `/data/manifest.json` 與清單內的 `/data/clips/*.json`；
+這些是靜態 JSON 路徑，未定義正式 API。後續傳輸方式可調整，須保留版本與欄位語意。
 
 ## 欄位說明與來源對照
 
@@ -66,8 +66,9 @@
 
 `timeline.time_basis` 為 source_timestamp_delta，duration_ms 等於最後一筆 t_ms。
 nominal_interval_ms=40 來自 sample 與 25 Hz 格式參考，不代表每筆恰隔 40 ms。
-gap_threshold_ms 是工程品質參數，不是來源欄位；尚未定案可為 null，正式匯出及驗收前
-須記錄採用的閾值與理由，不能用未定參數宣稱清理已完成。
+`gap_threshold_ms` 是必填的正整數，控制多大的時間間隔會切成新 clip。
+目前匯出命令採 120 ms；這是工程參數，來源資料沒有提供此值。Frontend 從輸出讀取它，
+不將 nominal_interval_ms 當成固定採樣間隔。
 
 timestamp 回退、跨節或來源中斷須先分段。同 timestamp 且 entity 狀態相同的重複點，
 可在保留來源索引後去重；狀態衝突則記錄並停止或隔離，不靜默覆蓋。
@@ -85,16 +86,17 @@ players metadata 要收集整個 clip 出現的球員，不能只取第一影格
 
 ## 欄位映射範例
 
-以下為文件中的規格映射例，數值取自已抽查 sample 的 `events[1].moments[0:2]`。
-這不是已實作 exporter 的結果，也不是正式採用宣告或完整展示片段。
-兩個 moments 相隔 39 ms；完整候選事件為 525 個 moments、20,959 ms，不可混用。
+以下是為說明欄位而手動整理的兩影格摘錄，位置與時間取自測試比賽
+`events[1].moments[0:2]`，兩影格相隔 39 ms。`is_excerpt=true` 與 `EXCERPT_ONLY`
+用來標示這份文件摘錄；後者是文件註記，不是 Backend 的品質警告代碼。
+實際回放請依 [匯出步驟](backend-s1.md#匯出) 產生完整 525 影格、20,959 ms 的片段。
 
 ### 片段清單
 
 ```json
 {
   "schema_version": "0.2.0",
-  "dataset": {"id": "sportvu-2015-16-candidate", "name": "NBA-Player-Movements", "version": "f7d4cf2c7e607029abfd5715a0d4073bedae328e", "adoption_status": "pending"},
+  "dataset": {"id": "nba-sportvu-2015-16", "name": "NBA-Player-Movements", "version": "f7d4cf2c7e607029abfd5715a0d4073bedae328e", "adoption_status": "local_s1_validation", "license_status": "unconfirmed", "usage_scope": "local_small_scale"},
   "clips": [
     {"clip_id": "0021500476-e2-preview", "label": "LAL at BOS：event 2 前兩個 moments（規格映射例）", "path": "clips/0021500476-e2-preview.json", "duration_ms": 39, "frame_count": 2}
   ]
@@ -111,7 +113,7 @@ players metadata 要收集整個 clip 出現的球員，不能只取第一影格
   "game": {"game_id": "0021500476", "game_date": "2015-12-30"},
   "source_event": {"event_id": "2", "event_index": 1, "start_moment_index": 0, "end_moment_index": 1},
   "coordinate_system": {"unit": "ft", "unit_basis": "external_format_reference", "frame": "source", "court_length": 94, "court_width": 50, "court_size_basis": "reference_geometry", "display_orientation": "unconfirmed"},
-  "timeline": {"time_basis": "source_timestamp_delta", "source_timestamp_origin_ms": 1451522482002, "duration_ms": 39, "nominal_interval_ms": 40, "gap_threshold_ms": null},
+  "timeline": {"time_basis": "source_timestamp_delta", "source_timestamp_origin_ms": 1451522482002, "duration_ms": 39, "nominal_interval_ms": 40, "gap_threshold_ms": 120},
   "teams": [
     {"side": "home", "team_id": "1610612738", "name": "Boston Celtics", "abbreviation": "BOS"},
     {"side": "visitor", "team_id": "1610612747", "name": "Los Angeles Lakers", "abbreviation": "LAL"}
@@ -271,10 +273,10 @@ players metadata 要收集整個 clip 出現的球員，不能只取第一影格
 - 不輸出假定的持球者、攻守方、戰術類別、信心值、傳球或改善建議。
 - 本版不決定 Frontend 框架、HTTP API、部署方式或整套系統選型。
 
-## 實作補充：連續 clip 與品質資訊
+## 完整匯出的分段與品質資訊
 
-完整執行方式與本次 525 影格輸出見 [S1 Backend](backend-s1.md)。上方兩影格範例保留作
-欄位映射說明，不代表目前完整輸出；正式匯出 gap_threshold_ms 一定是指定的正整數。
+完整執行方式與 525 影格結果見 [S1 Backend](backend-s1.md)。完整匯出會包含以下品質政策與
+統計；上方兩影格摘錄只用來說明欄位映射。
 
 - 時間間隔大於指定門檻、timestamp 回退或跨節會分成多個 clip；每個保留同一來源
   eventId 與原始 moment 範圍，不把不連續時間重新排序或偽裝成一個回合。
@@ -289,7 +291,7 @@ players metadata 要收集整個 clip 出現的球員，不能只取第一影格
 - source_file_sha256 以串流計算；沒有確認過 source_commit 時用 null。manifest 標記
   adoption_status=local_s1_validation、license_status=unconfirmed、usage_scope=local_small_scale。
 
-以上為補足未定品質政策與可觀測性的欄位，保留 0.2.0 的核心物件結構；Frontend 應能忽略
+以上欄位記錄資料處理方法與品質，保留 0.2.0 的核心物件結構；Frontend 應能忽略
 額外品質 metadata，但必須處理 null 與多 clip。後續不相容改動再更新 schema version。
 
 S2／S3 的速度、距離、模式與解釋另定衍生結果格式，需標示計算方法與證據來源。
