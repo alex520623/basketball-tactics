@@ -2,7 +2,7 @@
 
 S1 Backend 將 SportVU 單場事件轉為 JSON 0.2.0，保留球員、球隊、位置、時間及品質紀錄。
 此文件說明解析與匯出；介面操作見 [球場回放](local-viewer.md)，資料使用範圍見
-[資料管理](../data/README.md)。Backend 驗證紀錄日期為 2026-11-13。
+[資料準備](../data/README.md)。Backend 驗證紀錄日期為 2026-11-13。
 
 ## 程式入口
 
@@ -26,7 +26,7 @@ event 大小增加。來源 hash 以串流計算，不讀入全部檔案 bytes�
 5ad649c3b741cc45c01c586cbf073d56d67da0f2315fe7acedb477bc43116036
 ```
 
-資料準備步驟見 [資料管理](../data/README.md)，來源與壓縮檔 hash 見
+資料準備步驟見 [資料準備](../data/README.md)，來源與壓縮檔 hash 見
 [資料評估](sportvu-assessment.md)。只需同一單場原檔，資料檔案不提交 Git。
 
 在專案根目錄安裝依賴：
