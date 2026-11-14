@@ -119,8 +119,8 @@ play-by-play 若要加入，應視為額外來源，先驗證是否可取得、I
   [原始資料授權 issue #15](https://github.com/linouk23/NBA-Player-Movements/issues/15) 仍為 Open。
   公開可下載不代表已確認課程使用或再散布授權，需與課程要求及可取得的來源授權說明核對。
 
-建議將它列為優先候選：先決定授權與課程使用範圍，確認是否正式採用，再以已驗證單場
-及 `eventId="2"` 的候選視窗開始 Backend importer。正式採用前不擴大下載或開始功能實作。
+此來源已用於 S1 的指定單場與 `eventId="2"`，Backend 與球場回放均已實作。
+後續資料使用範圍依 [資料管理](../data/README.md)，其他比賽與進階分析需另作驗證。
 
 原始欄位見 [SportVU 欄位查核](sportvu-fields.md)；Backend 輸出見
 [資料交換規格 0.2.0 草案](data-contract.md)。

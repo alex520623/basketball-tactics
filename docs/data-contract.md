@@ -1,7 +1,7 @@
 # Backend JSON 資料交換規格
 
-狀態：**0.2.0 本機 S1 Backend 已實作**。2026-11-13 使用者決定採用 SportVU 作本機小規模
-技術驗證，授權仍待確認；Frontend 技術與整合方式未定。本版已實作解析與匯出，沒有 API 或 Frontend。
+狀態：**0.2.0 已實作解析、匯出與回放串接**。目前 [球場回放](local-viewer.md)
+透過 HTTP 讀取此格式，正式 API 與部署方式尚未定案。資料使用範圍見 [資料管理](../data/README.md)。
 0.1.0 的純示意公尺／左下角設定由本版取代。
 
 原始欄位與確認程度見 [SportVU 欄位查核](sportvu-fields.md)，下載與品質結果見
@@ -18,8 +18,8 @@
 - 使用標準 UTF-8 JSON，不含 NaN／Infinity，也不把 null 改成 0。
 
 邏輯上定義「片段清單 manifest」與「片段 clip」。檔案模式下，path 相對於 manifest 解析，
-如 `clips/id.json`。是否使用本機檔案、HTTP 或 API 傳遞，待 Frontend 選型後共同決定；
-此時不要求任何 server 或網址已存在。
+如 `clips/id.json`。現有回放服務提供 `/data/manifest.json` 與清單內的 `/data/clips/*.json`；
+這些是靜態 JSON 路徑，未定義正式 API。後續傳輸方式可調整，須保留版本與欄位語意。
 
 ## 欄位說明與來源對照
 

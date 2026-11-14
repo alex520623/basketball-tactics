@@ -1,7 +1,8 @@
 # S1 Backend：執行與交接
 
-驗證日期：2026-11-13。SportVU 2015–16 已選為 S1 本機小規模技術驗證來源，授權仍待確認。
-只處理既有單場檔案，不提供整庫下載、Frontend、戰術辨識、LLM 或訓練功能。
+S1 Backend 將 SportVU 單場事件轉為 JSON 0.2.0，保留球員、球隊、位置、時間及品質紀錄。
+此文件說明解析與匯出；介面操作見 [球場回放](local-viewer.md)，資料使用範圍見
+[資料管理](../data/README.md)。Backend 驗證紀錄日期為 2026-11-13。
 
 ## 程式入口
 
@@ -18,15 +19,15 @@ event 大小增加。來源 hash 以串流計算，不讀入全部檔案 bytes�
 
 ## Sample 與安裝
 
-本機既有檔案為 `.tools/sportvu-review/0021500476.json`，未重新下載。比賽是
-2015-12-30 Lakers at Celtics，SHA-256：
+測試比賽為 2015-12-30 Lakers at Celtics。以下命令以 `data/raw/0021500476.json` 為例，
+檔案在其他位置時請替換 `--input` 路徑。原檔 SHA-256：
 
 ```text
 5ad649c3b741cc45c01c586cbf073d56d67da0f2315fe7acedb477bc43116036
 ```
 
-其他電腦先取得同一單場原檔，來源與壓縮檔 hash 見 [資料評估](sportvu-assessment.md)。
-不要 clone 全部 636 個壓縮檔；原始檔保留本機，不能提交 Git。
+資料準備步驟見 [資料管理](../data/README.md)，來源與壓縮檔 hash 見
+[資料評估](sportvu-assessment.md)。只需同一單場原檔，資料檔案不提交 Git。
 
 在專案根目錄安裝依賴：
 
@@ -43,12 +44,12 @@ event 大小增加。來源 hash 以串流計算，不讀入全部檔案 bytes�
 ## 匯出
 
 以下讀取原始 `eventId="2"`，不是 `events[2]`，也不把它稱為完整進攻回合。
-輸出目錄必須尚不存在；這台電腦已產生 `outputs/s1-event-2/`，若重跑，請換成
-`outputs/s1-event-2-rerun/` 等新名稱，程式不覆蓋既有輸出。
+輸出目錄必須尚不存在。若 `outputs/s1-event-2/` 已有有效匯出，可直接啟動回放；
+若要重新匯出，請使用 `outputs/s1-event-2-rerun/` 等新名稱，程式不覆蓋既有輸出。
 
 ```powershell
 .\.venv\Scripts\python.exe -m basketball_tactics.cli `
-  --input .tools/sportvu-review/0021500476.json `
+  --input data/raw/0021500476.json `
   --event-id 2 `
   --output-dir outputs/s1-event-2 `
   --gap-threshold-ms 120 `
@@ -58,7 +59,7 @@ event 大小增加。來源 hash 以串流計算，不讀入全部檔案 bytes�
 
 ```bash
 .venv/bin/python -m basketball_tactics.cli \
-  --input .tools/sportvu-review/0021500476.json \
+  --input data/raw/0021500476.json \
   --event-id 2 \
   --output-dir outputs/s1-event-2 \
   --gap-threshold-ms 120 \
@@ -105,8 +106,8 @@ manifest 的 path 相對於 manifest 所在目錄。若事件有間隙、timesta
 ## 測試
 
 ```powershell
-# 使用既有預設 sample，或將 SPORTVU_SAMPLE 設為同一真實檔案的其他路徑
-$env:SPORTVU_SAMPLE = (Resolve-Path .tools/sportvu-review/0021500476.json).Path
+# 將 SPORTVU_SAMPLE 設為真實單場檔案的實際路徑
+$env:SPORTVU_SAMPLE = (Resolve-Path data/raw/0021500476.json).Path
 .\.venv\Scripts\python.exe -m pytest -q
 .\.venv\Scripts\python.exe -m pip check
 ```
@@ -126,9 +127,9 @@ SPORTVU_SAMPLE="/absolute/path/0021500476.json" .venv/bin/python -m pytest -q
 
 ## Frontend 交接
 
-已可在本機交付完整 manifest 與 clip JSON，格式見 [欄位規格](data-contract.md)。
+已可匯出完整 manifest 與 clip JSON，格式見 [欄位規格](data-contract.md)。
 Frontend 可以依 teams、players、frames、trajectories 讀取真實事件，不需要了解原始 tuple。
-傳輸與框架選型仍由組員確認，資料不放進公開網站或 Git。
+目前 [球場回放](local-viewer.md) 已串接此介面；後續框架與正式傳輸方式由組員共同確認。
 
 - 位置單位是 feet，保留 source 軸向；display_orientation 仍為 unconfirmed。
 - 畫面應使用 t_ms；比賽倒數與 shot clock 另作標籤。
